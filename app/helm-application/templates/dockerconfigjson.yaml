@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.deploy.imagePullSecrets }}
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: |
+    ewoJImF1dGhzIjogewoJCSJyZWdpc3RyeS5pbmdyZXNzLmxvY2FsIjogewoJCQkiYXV0aCI6ICJZblZ6ZVRwaVpXVT0iCgkJfQoJfQp9

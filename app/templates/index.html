@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Простое веб-приложение</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Простое веб-приложение</h1>
+            <p>Работает в Docker контейнере</p>
+        </header>
+
+        <main>
+            <section class="card">
+                <h2>Текущее время</h2>
+                <div id="time" class="time-display">Загрузка...</div>
+                <button onclick="fetchTime()" class="btn">Обновить время</button>
+            </section>
+
+            <section class="card">
+                <h2>Echo сервис</h2>
+                <input type="text" id="messageInput" placeholder="Введите сообщение..." class="input">
+                <button onclick="sendMessage()" class="btn btn-primary">Отправить</button>
+                <div id="echoResult" class="echo-result"></div>
+            </section>
+
+            <section class="card">
+                <h2>Информация о контейнере</h2>
+                <div class="info">
+                    <p><strong>Статус:</strong> ✅ Работает</p>
+                    <p><strong>Приложение:</strong> Flask + Docker</p>
+                    <p><strong>Версия:</strong> 1.0.0</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Веб-приложение в Docker | Простой пример</p>
+        </footer>
+    </div>
+
+    <script>
+        // Загрузка времени при старте
+        fetchTime();
+
+        async function fetchTime() {
+            try {
+                const response = await fetch('/api/time');
+                const data = await response.json();
+                document.getElementById('time').textContent = data.time;
+            } catch (error) {
+                document.getElementById('time').textContent = 'Ошибка загрузки';
+                console.error('Error:', error);
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) {
+                alert('Пожалуйста, введите сообщение');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/echo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                document.getElementById('echoResult').innerHTML = 
+                    `<div class="echo-response">Ответ: ${data.echo}</div>`;
+                input.value = '';
+            } catch (error) {
+                document.getElementById('echoResult').innerHTML = 
+                    '<div class="echo-error">Ошибка отправки</div>';
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

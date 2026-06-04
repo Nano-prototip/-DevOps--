@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deploy.name }}
+  labels:
+    app: {{ .Values.deploy.name }}
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: {{ .Values.deploy.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deploy.name }}
+    spec:
+      imagePullSecrets:
+      - name: {{ .Values.deploy.imagePullSecrets }}  
+      containers:
+      - name: {{ .Values.deploy.name }}
+        image: {{ .Values.deploy.image }}
+        ports:
+        - containerPort: {{ .Values.deploy.containerPort }}
+        resources:
+          requests:
+            memory: {{ .Values.deploy.requests.memory }}
+            cpu: {{ .Values.deploy.requests.cpu }}
+          limits:
+            memory: {{ .Values.deploy.limits.memory }}
+            cpu: {{ .Values.deploy.limits.cpu }}
+      {{ if .Values.deploy.podAntiAffinity.enabled }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - {{ .Values.deploy.name }}
+            topologyKey: kubernetes.io/hostname
+      {{ end }}

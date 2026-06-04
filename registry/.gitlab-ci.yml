@@ -1,0 +1,11 @@
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  script:
+    - echo "==== Deploy registry ===="
+    - cd $CI_PROJECT_DIR
+    - helm upgrade --install registry ./helm-registry  --namespace registry   --create-namespace   -f ./helm-registry/values.yaml
+  tags:
+    - diplom

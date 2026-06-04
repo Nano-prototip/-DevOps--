@@ -1,0 +1,25 @@
+deploy:
+  name: registry
+  replicas: 1
+  image: registry:latest
+  containerPort: 5000
+
+secret:
+  secretName: registry-auth
+
+ingress:
+  name: registry-ingress
+  ingressClassName: nginx
+  host: registry.ingress.local
+
+pvc:
+  name: registry-pvc
+  accessModes: ReadWriteOnce 
+  resources:
+      storage: 10Gi  
+
+service:
+  name: registry-service
+  port: 5000
+  targetPort: 5000
+  type: ClusterIP

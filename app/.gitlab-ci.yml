@@ -1,0 +1,33 @@
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  script:
+    - echo "==== Login in docker registry ===="
+    - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD $DOCKER_REGISTRY
+    - echo "==== Build image version $CI_COMMIT_TAG ===="
+    - docker build . -t registry.ingress.local/app:$CI_COMMIT_TAG
+    - echo  "==== Check image with version $CI_COMMIT_TAG ===="
+    - docker images | grep "registry.ingress.local/app:$CI_COMMIT_TAG"
+    - echo  "==== Push image with version $CI_COMMIT_TAG ===="
+    - docker push registry.ingress.local/app:$CI_COMMIT_TAG
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+      when: always
+  tags:
+    - diplom
+
+deploy:
+  stage: deploy
+  script:
+    - echo "==== Update version in values.yml ===="
+    - cd $CI_PROJECT_DIR
+    - yq -i -y ".deploy.image = \"$DOCKER_REGISTRY/app:$CI_COMMIT_TAG\"" ./helm-application/values.yaml
+    - helm upgrade --install application ./helm-application  --namespace application   --create-namespace   -f ./helm-application/values.yaml
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+      when: always
+  tags:
+    - diplom

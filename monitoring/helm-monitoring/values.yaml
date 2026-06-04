@@ -1,0 +1,92 @@
+kube-prometheus-stack:
+  enabled: true
+
+kube-prometheus-stack:
+  fullnameOverride: "monitoring"
+
+  prometheus:
+    enabled: true
+    prometheusSpec:
+      retention: 3d
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 10Gi
+            storageClassName: standard
+
+  alertmanager:
+    enabled: true
+    alertmanagerSpec:
+      replicas: 3
+
+  grafana:
+    initChownData:
+      enabled: false
+    enabled: true
+    adminPassword: "admin"
+    persistence:
+      enabled: true
+      size: 10Gi
+    service:
+      type: ClusterIP
+      port: 3000
+
+  kubeControllerManager:
+    enabled: true
+  kubeScheduler:
+    enabled: true
+  kubeEtcd:
+    enabled: true
+  kubeProxy:
+    enabled: true
+
+  additionalAlertmanagerConfigs:
+    - name: application-alerts
+      config:
+        route:
+          group_by: ['job']
+          group_wait: 10s
+          group_interval: 10s
+          repeat_interval: 1h
+          receiver: 'application'
+        receivers:
+          - name: 'application'
+            webhook_configs:
+              - url: 'http://example.com/'
+
+  # additionalPrometheusRulesMap:
+  #   custom-rules:
+  #     groups:
+  #       - name: example
+  #         rules:
+  #           - alert: HighRequestLatency
+  #             expr: job:request_latency_seconds:mean5m{job="myjob"} > 0.5
+  #             for: 10m
+  #             labels:
+  #               severity: page
+  #             annotations:
+  #               summary: High request latency on {{ $labels.job }}
+  #               description: "{{ $labels.job }} has a median request latency above 0.5s (current value: {{ $value }}s)"
+
+  serviceMonitor:
+    enabled: true
+
+  resources:
+    requests:
+      memory: 200Mi
+      cpu: 100m
+    limits:
+      memory: 500Mi
+      cpu: 200m
+
+  ingress:
+    enabled: false  # Включите, если нужен внешний доступ
+    annotations: {}
+    hosts:
+      - host: grafana.example.com
+        paths:
+          - /
+  namespaceOverride: monitoring

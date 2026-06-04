@@ -1,0 +1,11 @@
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  script:
+    - echo "==== Deploy monitoring ===="
+    - cd $CI_PROJECT_DIR
+    - helm upgrade --install monitoring ./helm-monitoring  --namespace monitoring   --create-namespace   -f ./helm-monitoring/values.yaml
+  tags:
+    - diplom

@@ -14,7 +14,7 @@ resource "yandex_kubernetes_cluster" "k8s" {
         subnet_id = yandex_vpc_subnet.terraform_a.id
         zone      = yandex_vpc_subnet.terraform_a.zone
     }
-          master_location {
+    master_location {
         subnet_id = yandex_vpc_subnet.terraform_b.id
         zone      = yandex_vpc_subnet.terraform_b.zone
     }

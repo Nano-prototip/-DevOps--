@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deploy.name }}
+spec:
+  replicas: {{ .Values.deploy.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.deploy.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deploy.name }}
+    spec:
+      containers:
+      - name: {{ .Values.deploy.name }}
+        image: {{ .Values.deploy.image }}
+        env:
+        - name: REGISTRY_AUTH
+          value: htpasswd
+        - name: REGISTRY_AUTH_HTPASSWD_REALM
+          value: "Registry Realm"
+        - name: REGISTRY_AUTH_HTPASSWD_PATH
+          value: /auth/registry.password
+        - name: REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY
+          value: /data
+        ports:
+        - containerPort: {{ .Values.deploy.containerPort }}
+        volumeMounts:
+        - name: auth-volume
+          mountPath: /auth
+        - name: data-volume
+          mountPath: /data
+      volumes:
+      - name: auth-volume
+        secret:
+          secretName: {{ .Values.secret.secretName }}
+          items:
+          - key: htpasswd
+            path: registry.password
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: {{ .Values.pvc.name }}

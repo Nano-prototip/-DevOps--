@@ -1,0 +1,19 @@
+deploy:
+  name: application
+  image: registry.ingress.local/app:v1
+  imagePullSecrets: my-registry-secret     
+  containerPort: 5000
+  requests:
+    memory: "64Mi"
+    cpu: "50m"
+  limits:
+    memory: "128Mi"
+    cpu: "100m"
+  podAntiAffinity: 
+    enabled: true
+
+service:
+  name: application
+  port: 5000
+  targetPort: 5000
+  type: ClusterIP
